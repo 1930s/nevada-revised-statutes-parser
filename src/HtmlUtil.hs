@@ -1,12 +1,13 @@
 module HtmlUtil  where
 
-import           BasicPrelude
-import qualified Data.Text as T
+import           BasicPrelude      hiding (error)
+import           Data.Aeson        (ToJSON)
+import qualified Data.Text         as T
+import           GHC.Generics      (Generic)
 import           Text.HTML.TagSoup (Tag, innerText, partitions, (~/=), (~==))
-import           GHC.Generics (Generic)
-import           Data.Aeson   (ToJSON)
 
-import           FileUtil          (AbsolutePath, readFileLatin1, toFilePath, fixture)
+import           FileUtil          (AbsolutePath, error, fixture,
+                                    readFileLatin1, toFilePath)
 
 
 html_fixture :: FilePath -> IO Html
@@ -34,7 +35,7 @@ findFirst ∷ Text → [Tag Text] → [Tag Text]
 findFirst searchTerm tags =
     case findAll searchTerm tags of
         (x:_) -> x
-        _     -> error $ "Could not find the tag " ++ (T.unpack searchTerm) ++ " in: " ++ (show tags)
+        _     -> error $ "Could not find the tag " ++ searchTerm ++ " in: " ++ (T.pack $ show tags)
 
 
 -- Return all the occurrences of an HTML tag within the given
