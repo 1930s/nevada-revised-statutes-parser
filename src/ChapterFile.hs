@@ -175,7 +175,7 @@ sectionNameFromParagraph = normalizedInnerText . (dropWhile (~/= closingA))
 
 
 headingGroups :: [Tag Text] -> [[Tag Text]]
-headingGroups tags = partitions (~== ("<p class=COHead2>"::String)) tags
+headingGroups tags = partitions (~== ("<p class=COHead2>"::Text)) tags
 
 
 -- Input:  "NRS: CHAPTER 432B - PROTECTION OF CHILDREN FROM ABUSE AND NEGLECT"
