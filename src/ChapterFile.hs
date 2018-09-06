@@ -1,6 +1,6 @@
 module ChapterFile where
 
-import           BasicPrelude
+import           BasicPrelude         hiding (error)
 import qualified Data.Attoparsec.Text (Parser, parseOnly, takeText, takeWhile)
 import           Data.Char            (isAlpha, isSpace)
 import qualified Data.HashMap.Lazy    as HM
@@ -10,9 +10,8 @@ import           Text.Parser.Char
 import           Text.Printf
 
 
-import           Config
-import           FileUtil             (RelativePath, toRelativePath)
-import qualified FileUtil             as Util
+import           qualified Config as Config
+import           FileUtil             (RelativePath, toRelativePath, error)
 import           HtmlUtil             (Html (NewHtml),
                                        shaveBackTagsToLastClosingP, titleText,
                                        toText)
@@ -46,7 +45,7 @@ fillInEmptyChapter chapterMap emptyChapter  =
     let key       = chapterNumberToFilename (Chapter.number emptyChapter)
         maybeHtml = HM.lookup key chapterMap
     in
-      if not $ (Chapter.number emptyChapter) `elem` chaptersToSkip
+      if not $ (Chapter.number emptyChapter) `elem` Config.chaptersToSkip
       then case maybeHtml of
         Just html -> parseChapter html
         Nothing   -> error $ "Chapter " ++ (show key) ++ " not found."
@@ -67,7 +66,7 @@ parseChapter chapterHtml =
     Chapter
     { Chapter.name = rawName
     , Chapter.number = rawNumber
-    , Chapter.url = chapterUrlPrefix ++ rawNumber ++ ".html"
+    , Chapter.url = Config.chapterUrlPrefix ++ rawNumber ++ ".html"
     , Chapter.subChapters = subChaps
     }
   where
@@ -122,7 +121,7 @@ parseNumberFromRawNumberText numberText secName =
     case words numberText of
         (_:x:_) -> x
         _ ->
-            Util.error $
+            error $
                 "Expected section \"" ++ secName ++
                 "\" raw number \"" ++ numberText ++
                 "\" to have at least two words"
@@ -184,13 +183,12 @@ headingGroups tags = partitions (~== ("<p class=COHead2>"::String)) tags
 -- Output: ("432B", "Protection of Children from Abuse and Neglect")
 parseChapterFileTitle :: Text -> (Text, Text)
 parseChapterFileTitle input =
-    if input == chapterZeroTitle
+    if input == Config.chapterZeroTitle
         then (T.pack "0", T.pack "Preliminary Chapter – General Provisions")
         else case (Data.Attoparsec.Text.parseOnly chapterTitleParser input) of
                  Left e ->
                      error $
-                     "Could not parse chapter file title '" ++
-                     (show input) ++ "'\n" ++ e
+                     "Could not parse chapter file title '" ++ (show input) ++ "'\n" ++ e
                  Right b -> b
 
 
@@ -232,4 +230,4 @@ rawSectionGroupFromSectionGroups secNumber sectionGroups =
     let bodyNumbers = filter (isSectionBodyNumber secNumber) sectionGroups
         in case bodyNumbers of
             (x:_) -> shaveBackTagsToLastClosingP x
-            _     -> error $ "Error, could not find section body number " ++ (T.unpack secNumber) ++ " in section groups: " ++ (show sectionGroups)
+            _     -> error $ "Error, could not find section body number " ++ secNumber ++ " in section groups: " ++ (T.pack $ show sectionGroups)
