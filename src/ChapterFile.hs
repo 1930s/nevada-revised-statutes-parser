@@ -23,11 +23,6 @@ import           TextUtil             (normalizeWhiteSpace, normalizedInnerText,
                                        titleize)
 
 
---
--- TODO: Any way to shorten this file?
---
-
-
 type ChapterMap = HashMap RelativePath Html
 
 closingA :: String

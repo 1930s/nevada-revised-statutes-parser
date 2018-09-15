@@ -1,6 +1,6 @@
 module TextUtil where
 
-import           BasicPrelude
+import           BasicPrelude      hiding (error)
 import           Data.Char         (isAlpha)
 import qualified Data.Text         as T
 import           Text.HTML.TagSoup
